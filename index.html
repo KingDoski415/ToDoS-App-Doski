@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>King Quests</title>
+    <title>King Quests - Kalender & ToDos</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
@@ -22,66 +22,111 @@
                     <i data-lucide="crown" class="w-5 h-5 text-amber-400"></i>
                     <h1 class="text-xl font-black text-white">King Quests</h1>
                 </div>
-                <p id="counter-sub" class="text-xs text-slate-400 mt-0.5">Lade Aufgaben...</p>
+                <p class="text-xs text-slate-400 mt-0.5">Termine & To-Dos mit Zeitfenster</p>
             </div>
             <button onclick="toggleModal(true)" class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-lg shadow-indigo-600/30 active:scale-95 transition-transform">
                 <i data-lucide="plus" class="w-5 h-5"></i>
             </button>
         </header>
 
-        <!-- Main Content -->
+        <!-- Main Content Area -->
         <main class="flex-1 overflow-y-auto no-scrollbar p-4 space-y-4">
             
-            <!-- Progress Bar Card -->
-            <div class="bg-gradient-to-r from-indigo-600 to-violet-600 rounded-2xl p-4 shadow-lg text-white">
-                <div class="flex justify-between items-center mb-2">
-                    <span class="text-xs font-semibold uppercase tracking-wider text-indigo-200">Fortschritt</span>
-                    <span id="progress-percent" class="text-lg font-black">0%</span>
+            <!-- Kalender Header Navigation -->
+            <div class="bg-slate-800/80 rounded-2xl p-4 border border-slate-700/60 shadow-lg">
+                <div class="flex justify-between items-center mb-4">
+                    <button onclick="changeMonth(-1)" class="p-2 text-slate-400 hover:text-white rounded-lg active:bg-slate-700">
+                        <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                    </button>
+                    <h2 id="month-year-label" class="text-base font-bold text-white"></h2>
+                    <button onclick="changeMonth(1)" class="p-2 text-slate-400 hover:text-white rounded-lg active:bg-slate-700">
+                        <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                    </button>
                 </div>
-                <div class="w-full bg-black/20 h-2 rounded-full overflow-hidden">
-                    <div id="progress-bar" class="bg-white h-full w-0 transition-all duration-300 rounded-full"></div>
+
+                <!-- Wochentage -->
+                <div class="grid grid-cols-7 gap-1 text-center text-[11px] font-bold text-slate-400 mb-2">
+                    <div>Mo</div><div>Di</div><div>Mi</div><div>Do</div><div>Fr</div><div>Sa</div><div>So</div>
                 </div>
+
+                <!-- Kalender Tage Grid -->
+                <div id="calendar-grid" class="grid grid-cols-7 gap-1 text-center text-xs"></div>
             </div>
 
-            <!-- Filter -->
-            <div class="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-                <button onclick="setFilter('all')" data-f="all" class="filter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 text-white whitespace-nowrap transition-all">Alle</button>
-                <button onclick="setFilter('King Quests')" data-f="King Quests" class="filter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-400 whitespace-nowrap transition-all">👑 King Quests</button>
-                <button onclick="setFilter('Arbeit')" data-f="Arbeit" class="filter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-400 whitespace-nowrap transition-all">💼 Arbeit</button>
-                <button onclick="setFilter('Privat')" data-f="Privat" class="filter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-400 whitespace-nowrap transition-all">🏠 Privat</button>
+            <!-- Tages-Aufgaben Header -->
+            <div class="flex justify-between items-center px-1 pt-1">
+                <div>
+                    <h3 id="selected-day-title" class="font-black text-base text-white">Tagesübersicht</h3>
+                    <p id="selected-day-sub" class="text-xs text-slate-400">Ausgewählter Tag</p>
+                </div>
+                <button onclick="selectToday()" class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 active:scale-95 transition-transform">
+                    Heute
+                </button>
             </div>
 
-            <!-- Task List -->
+            <!-- Task & Termine List -->
             <div id="task-list" class="space-y-2.5 pb-20"></div>
 
             <!-- Empty State -->
-            <div id="empty-state" class="hidden flex-col items-center justify-center py-12 text-center">
-                <i data-lucide="check-circle" class="w-10 h-10 text-slate-600 mb-2"></i>
-                <p class="text-sm text-slate-400 font-medium">Keine Aufgaben in dieser Liste</p>
+            <div id="empty-state" class="hidden flex-col items-center justify-center py-8 text-center">
+                <i data-lucide="calendar-check-2" class="w-10 h-10 text-slate-600 mb-2"></i>
+                <p class="text-sm text-slate-400 font-medium">Keine Einträge für diesen Tag</p>
+                <p class="text-xs text-slate-500 mt-0.5">Tippe auf das +, um To-Dos oder Termine anzulegen.</p>
             </div>
         </main>
 
-        <!-- Modal -->
+        <!-- New Item Modal -->
         <div id="modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end justify-center hidden opacity-0 transition-opacity duration-200">
             <div class="bg-slate-900 w-full max-w-md rounded-t-3xl p-5 border-t border-slate-800 space-y-4">
                 <div class="flex justify-between items-center">
-                    <h3 class="font-bold text-white text-base">Neue Quest hinzufügen</h3>
+                    <h3 class="font-bold text-white text-base">Neuer Eintrag</h3>
                     <button onclick="toggleModal(false)" class="text-slate-400 p-1"><i data-lucide="x" class="w-5 h-5"></i></button>
                 </div>
-                <input type="text" id="task-title" placeholder="Aufgabenbezeichnung..." class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500">
+                
+                <!-- Typ-Auswahl (To-Do vs. Termin) -->
+                <div class="grid grid-cols-2 gap-2 p-1 bg-slate-800 rounded-xl border border-slate-700">
+                    <button type="button" onclick="setType('todo')" id="type-btn-todo" class="py-2 text-xs font-bold rounded-lg bg-indigo-600 text-white transition-all">
+                        <i data-lucide="check-square" class="w-3.5 h-3.5 inline mr-1"></i> To-Do
+                    </button>
+                    <button type="button" onclick="setType('event')" id="type-btn-event" class="py-2 text-xs font-bold rounded-lg text-slate-400 transition-all">
+                        <i data-lucide="calendar" class="w-3.5 h-3.5 inline mr-1"></i> Termin
+                    </button>
+                </div>
+
+                <input type="text" id="item-title" placeholder="Titel / Bezeichnung..." class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500">
+                
+                <div>
+                    <label class="text-[11px] text-slate-400 block mb-1">Datum</label>
+                    <input type="date" id="item-date" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none">
+                </div>
+
+                <!-- Zeitfenster: Start & Ende -->
                 <div class="grid grid-cols-2 gap-3">
-                    <select id="task-cat" class="bg-slate-800 border border-slate-700 rounded-xl px-3 py-3 text-sm text-white focus:outline-none">
+                    <div>
+                        <label class="text-[11px] text-slate-400 block mb-1">Startzeit</label>
+                        <input type="time" id="item-start-time" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="text-[11px] text-slate-400 block mb-1">Endzeit</label>
+                        <input type="time" id="item-end-time" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <select id="item-cat" class="bg-slate-800 border border-slate-700 rounded-xl px-3 py-3 text-xs text-white focus:outline-none">
                         <option value="King Quests">👑 King Quests</option>
                         <option value="Arbeit">💼 Arbeit</option>
                         <option value="Privat">🏠 Privat</option>
+                        <option value="Einkauf">🛒 Einkauf</option>
                     </select>
-                    <select id="task-prio" class="bg-slate-800 border border-slate-700 rounded-xl px-3 py-3 text-sm text-white focus:outline-none">
+                    <select id="item-prio" class="bg-slate-800 border border-slate-700 rounded-xl px-3 py-3 text-xs text-white focus:outline-none">
                         <option value="hoch">🔥 Hoch</option>
                         <option value="mittel" selected>⚡ Mittel</option>
                         <option value="niedrig">🌱 Niedrig</option>
                     </select>
                 </div>
-                <button onclick="addTask()" class="w-full py-3.5 bg-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-600/30 active:scale-95 transition-transform">
+
+                <button onclick="addItem()" class="w-full py-3.5 bg-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-600/30 active:scale-95 transition-transform">
                     Speichern
                 </button>
             </div>
@@ -90,105 +135,200 @@
     </div>
 
     <script>
-        let tasks = JSON.parse(localStorage.getItem('king_quests_v2')) || [
-            { id: 1, title: 'Erste King Quest starten', cat: 'King Quests', prio: 'hoch', done: false }
+        const todayStr = new Date().toISOString().split('T')[0];
+        let currentDate = new Date();
+        let selectedDateStr = todayStr;
+        let selectedType = 'todo';
+
+        let items = JSON.parse(localStorage.getItem('king_quests_v3')) || [
+            { id: 1, type: 'todo', title: 'Projekt-Präsentation ausarbeiten', date: todayStr, startTime: '09:00', endTime: '11:30', cat: 'Arbeit', prio: 'hoch', done: false },
+            { id: 2, type: 'event', title: 'Team Meeting', date: todayStr, startTime: '14:00', endTime: '15:00', cat: 'Arbeit', prio: 'mittel', done: false }
         ];
-        let filter = 'all';
 
         function save() {
-            localStorage.setItem('king_quests_v2', JSON.stringify(tasks));
-            render();
+            localStorage.setItem('king_quests_v3', JSON.stringify(items));
+            renderCalendar();
+            renderItems();
         }
 
-        function render() {
+        function setType(type) {
+            selectedType = type;
+            const btnTodo = document.getElementById('type-btn-todo');
+            const btnEvent = document.getElementById('type-btn-event');
+
+            if (type === 'todo') {
+                btnTodo.className = "py-2 text-xs font-bold rounded-lg bg-indigo-600 text-white transition-all";
+                btnEvent.className = "py-2 text-xs font-bold rounded-lg text-slate-400 transition-all";
+            } else {
+                btnEvent.className = "py-2 text-xs font-bold rounded-lg bg-indigo-600 text-white transition-all";
+                btnTodo.className = "py-2 text-xs font-bold rounded-lg text-slate-400 transition-all";
+            }
+        }
+
+        function renderCalendar() {
+            const grid = document.getElementById('calendar-grid');
+            grid.innerHTML = '';
+
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+
+            const monthNames = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
+            document.getElementById('month-year-label').textContent = `${monthNames[month]} ${year}`;
+
+            const firstDayIndex = new Date(year, month, 1).getDay();
+            const adjustedFirstDay = (firstDayIndex === 0 ? 6 : firstDayIndex - 1);
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            for (let i = 0; i < adjustedFirstDay; i++) {
+                grid.appendChild(document.createElement('div'));
+            }
+
+            for (let d = 1; d <= daysInMonth; d++) {
+                const monthFormatted = String(month + 1).padStart(2, '0');
+                const dayFormatted = String(d).padStart(2, '0');
+                const dateKey = `${year}-${monthFormatted}-${dayFormatted}`;
+
+                const hasPending = items.some(i => i.date === dateKey && !i.done);
+                const isSelected = dateKey === selectedDateStr;
+                const isToday = dateKey === todayStr;
+
+                const dayBtn = document.createElement('button');
+                dayBtn.onclick = () => {
+                    selectedDateStr = dateKey;
+                    renderCalendar();
+                    renderItems();
+                };
+
+                let bgClass = "bg-slate-900/50 text-slate-300 hover:bg-slate-800";
+                if (isSelected) bgClass = "bg-indigo-600 text-white font-bold ring-2 ring-indigo-400";
+                else if (isToday) bgClass = "bg-indigo-950/80 text-indigo-300 border border-indigo-500/50 font-bold";
+
+                dayBtn.className = `h-10 rounded-xl flex flex-col items-center justify-center relative transition-all ${bgClass}`;
+                dayBtn.innerHTML = `
+                    <span>${d}</span>
+                    ${hasPending ? '<span class="w-1.5 h-1.5 rounded-full bg-amber-400 absolute bottom-1"></span>' : ''}
+                `;
+
+                grid.appendChild(dayBtn);
+            }
+        }
+
+        function renderItems() {
             const list = document.getElementById('task-list');
             const empty = document.getElementById('empty-state');
             list.innerHTML = '';
 
-            const filtered = tasks.filter(t => filter === 'all' || t.cat === filter);
+            const dateParts = selectedDateStr.split('-');
+            document.getElementById('selected-day-title').textContent = `${dateParts[2]}.${dateParts[1]}.${dateParts[0]}`;
 
-            if (filtered.length === 0) {
+            const dayItems = items.filter(i => i.date === selectedDateStr);
+
+            // Nach Startzeit sortieren
+            dayItems.sort((a, b) => (a.startTime || '99:99').localeCompare(b.startTime || '99:99'));
+
+            if (dayItems.length === 0) {
                 empty.classList.remove('hidden');
                 empty.classList.add('flex');
             } else {
                 empty.classList.add('hidden');
                 empty.classList.remove('flex');
 
-                filtered.forEach(t => {
+                dayItems.forEach(item => {
                     const card = document.createElement('div');
                     card.className = `p-3.5 rounded-xl border flex items-center justify-between gap-3 transition-all ${
-                        t.done ? 'bg-slate-900/50 border-slate-800/60 opacity-50 line-through' : 'bg-slate-900 border-slate-800 shadow-sm'
+                        item.done ? 'bg-slate-900/50 border-slate-800/60 opacity-50 line-through' : 'bg-slate-800 border-slate-700/80 shadow-md'
                     }`;
+
+                    // Zeit-String zusammensetzen (Start - Ende)
+                    let timeText = '';
+                    if (item.startTime && item.endTime) timeText = `${item.startTime} - ${item.endTime} Uhr`;
+                    else if (item.startTime) timeText = `ab ${item.startTime} Uhr`;
+                    else if (item.endTime) timeText = `bis ${item.endTime} Uhr`;
+
+                    const typeBadge = item.type === 'event' 
+                        ? '<span class="text-[9px] px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-300 font-bold uppercase">Termin</span>'
+                        : '<span class="text-[9px] px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-bold uppercase">To-Do</span>';
+
                     card.innerHTML = `
-                        <div class="flex items-center gap-3 flex-1 min-w-0" onclick="toggleTask(${t.id})">
-                            <div class="w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 ${t.done ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-slate-600'}">
-                                ${t.done ? '<i data-lucide="check" class="w-3.5 h-3.5"></i>' : ''}
+                        <div class="flex items-center gap-3 flex-1 min-w-0" onclick="toggleItem(${item.id})">
+                            <div class="w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 ${item.done ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-slate-600'}">
+                                ${item.done ? '<i data-lucide="check" class="w-3.5 h-3.5"></i>' : (item.type === 'event' ? '<i data-lucide="calendar" class="w-3 h-3 text-slate-400"></i>' : '')}
                             </div>
                             <div class="min-w-0 flex-1">
-                                <div class="text-sm font-medium text-slate-100 truncate">${escapeHtml(t.title)}</div>
-                                <div class="text-[10px] text-slate-400 mt-0.5">${escapeHtml(t.cat)}</div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-sm font-medium text-slate-100 truncate">${escapeHtml(item.title)}</span>
+                                    ${typeBadge}
+                                </div>
+                                <div class="flex items-center gap-2 text-[10px] text-slate-400 mt-0.5">
+                                    ${timeText ? `<span class="flex items-center gap-1 text-amber-400 font-semibold"><i data-lucide="clock" class="w-3 h-3"></i>${timeText}</span> •` : ''}
+                                    <span>${escapeHtml(item.cat)}</span>
+                                </div>
                             </div>
                         </div>
-                        <button onclick="deleteTask(${t.id})" class="text-slate-500 hover:text-red-400 p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        <button onclick="deleteItem(${item.id})" class="text-slate-500 hover:text-red-400 p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                     `;
                     list.appendChild(card);
                 });
             }
 
-            // Progress stats
-            const total = tasks.length;
-            const done = tasks.filter(t => t.done).length;
-            const pct = total > 0 ? Math.round((done / total) * 100) : 0;
-            document.getElementById('progress-percent').textContent = `${pct}%`;
-            document.getElementById('progress-bar').style.width = `${pct}%`;
-            document.getElementById('counter-sub').textContent = `${total - done} Aufgaben offen`;
-
             lucide.createIcons();
         }
 
-        function addTask() {
-            const titleInput = document.getElementById('task-title');
+        function addItem() {
+            const titleInput = document.getElementById('item-title');
             const title = titleInput.value.trim();
             if (!title) return;
 
-            tasks.unshift({
+            const date = document.getElementById('item-date').value || selectedDateStr;
+            const startTime = document.getElementById('item-start-time').value;
+            const endTime = document.getElementById('item-end-time').value;
+
+            items.push({
                 id: Date.now(),
+                type: selectedType,
                 title,
-                cat: document.getElementById('task-cat').value,
-                prio: document.getElementById('task-prio').value,
+                date,
+                startTime,
+                endTime,
+                cat: document.getElementById('item-cat').value,
+                prio: document.getElementById('item-prio').value,
                 done: false
             });
 
             titleInput.value = '';
+            document.getElementById('item-start-time').value = '';
+            document.getElementById('item-end-time').value = '';
+            selectedDateStr = date;
             toggleModal(false);
             save();
         }
 
-        function toggleTask(id) {
-            tasks = tasks.map(t => t.id === id ? { ...t, done: !t.done } : t);
+        function toggleItem(id) {
+            items = items.map(i => i.id === id ? { ...i, done: !i.done } : i);
             save();
         }
 
-        function deleteTask(id) {
-            tasks = tasks.filter(t => t.id !== id);
+        function deleteItem(id) {
+            items = items.filter(i => i.id !== id);
             save();
         }
 
-        function setFilter(f) {
-            filter = f;
-            document.querySelectorAll('.filter-btn').forEach(b => {
-                if (b.dataset.f === f) {
-                    b.className = 'filter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 text-white whitespace-nowrap transition-all';
-                } else {
-                    b.className = 'filter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-400 whitespace-nowrap transition-all';
-                }
-            });
-            render();
+        function changeMonth(delta) {
+            currentDate.setMonth(currentDate.getMonth() + delta);
+            renderCalendar();
+        }
+
+        function selectToday() {
+            currentDate = new Date();
+            selectedDateStr = todayStr;
+            renderCalendar();
+            renderItems();
         }
 
         function toggleModal(show) {
             const m = document.getElementById('modal');
             if (show) {
+                document.getElementById('item-date').value = selectedDateStr;
                 m.classList.remove('hidden');
                 setTimeout(() => m.classList.remove('opacity-0'), 10);
             } else {
@@ -201,7 +341,9 @@
             return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
         }
 
-        render();
+        // Init
+        renderCalendar();
+        renderItems();
     </script>
 </body>
 </html>
