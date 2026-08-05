@@ -3,144 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>King Quests - To-Do App</title>
-    <!-- Tailwind CSS -->
+    <title>King Quests</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#eef2ff',
-                            100: '#e0e7ff',
-                            500: '#6366f1',
-                            600: '#4f46e5',
-                            700: '#4338ca',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        body {
-            -webkit-tap-highlight-color: transparent;
-            user-select: none;
-            touch-action: manipulation;
-        }
+        body { -webkit-tap-highlight-color: transparent; user-select: none; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .task-card { transition: transform 0.15s ease, opacity 0.2s ease; }
-        .task-card:active { transform: scale(0.98); }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-100 h-full flex flex-col font-sans">
-
-    <!-- App Container -->
-    <div class="max-w-md w-full mx-auto h-full flex flex-col bg-slate-900 overflow-hidden relative border-x border-slate-800">
+<body class="bg-slate-950 text-slate-100 h-full flex flex-col font-sans">
+    <div class="max-w-md w-full mx-auto h-full flex flex-col bg-slate-900 overflow-hidden relative shadow-2xl">
         
         <!-- Header -->
         <header class="px-5 pt-6 pb-4 bg-slate-900/90 backdrop-blur-md sticky top-0 z-20 border-b border-slate-800 flex items-center justify-between">
             <div>
                 <div class="flex items-center gap-2">
                     <i data-lucide="crown" class="w-5 h-5 text-amber-400"></i>
-                    <h1 class="text-xl font-black tracking-tight text-white">King Quests</h1>
+                    <h1 class="text-xl font-black text-white">King Quests</h1>
                 </div>
-                <p id="subhead-status" class="text-xs text-slate-400 mt-0.5">Lade Aufgaben...</p>
+                <p id="counter-sub" class="text-xs text-slate-400 mt-0.5">Lade Aufgaben...</p>
             </div>
-            <button onclick="openModal()" class="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-lg shadow-indigo-600/30 active:scale-90 transition-transform">
-                <i data-lucide="plus" class="w-6 h-6"></i>
+            <button onclick="toggleModal(true)" class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-lg shadow-indigo-600/30 active:scale-95 transition-transform">
+                <i data-lucide="plus" class="w-5 h-5"></i>
             </button>
         </header>
 
-        <!-- Main Content Scroll Area -->
-        <main class="flex-1 overflow-y-auto no-scrollbar p-4 space-y-5">
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto no-scrollbar p-4 space-y-4">
             
-            <!-- Progress Card -->
-            <div class="bg-gradient-to-r from-indigo-600 to-violet-600 rounded-3xl p-5 shadow-xl text-white relative overflow-hidden">
-                <div class="relative z-10 flex items-center justify-between">
-                    <div>
-                        <span class="text-xs font-semibold tracking-wider text-indigo-200 uppercase">Tagesfortschritt</span>
-                        <div id="progress-percent" class="text-3xl font-black mt-1">0%</div>
-                        <div id="progress-text" class="text-xs text-indigo-100 mt-1">0 von 0 Aufgaben erledigt</div>
-                    </div>
-                    <div class="w-16 h-16 rounded-full border-4 border-white/20 flex items-center justify-center relative">
-                        <i data-lucide="check-circle-2" class="w-8 h-8 text-white"></i>
-                    </div>
+            <!-- Progress Bar Card -->
+            <div class="bg-gradient-to-r from-indigo-600 to-violet-600 rounded-2xl p-4 shadow-lg text-white">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-xs font-semibold uppercase tracking-wider text-indigo-200">Fortschritt</span>
+                    <span id="progress-percent" class="text-lg font-black">0%</span>
                 </div>
-                <!-- Progress Bar Container -->
-                <div class="w-full bg-black/20 h-2 rounded-full mt-4 overflow-hidden">
-                    <div id="progress-bar" class="bg-white h-full w-0 transition-all duration-500 rounded-full"></div>
+                <div class="w-full bg-black/20 h-2 rounded-full overflow-hidden">
+                    <div id="progress-bar" class="bg-white h-full w-0 transition-all duration-300 rounded-full"></div>
                 </div>
             </div>
 
-            <!-- Category Filter Tabs -->
-            <div class="flex gap-2 overflow-x-auto no-scrollbar pb-1" id="category-filters">
-                <button onclick="setFilter('all')" data-filter="all" class="filter-btn px-4 py-2 rounded-xl text-xs font-bold bg-indigo-600 text-white transition-all whitespace-nowrap">Alle</button>
-                <button onclick="setFilter('King Quests')" data-filter="King Quests" class="filter-btn px-4 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-400 transition-all whitespace-nowrap flex items-center gap-1.5">
-                    <i data-lucide="crown" class="w-3.5 h-3.5 text-amber-400"></i> King Quests
-                </button>
-                <button onclick="setFilter('Arbeit')" data-filter="Arbeit" class="filter-btn px-4 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-400 transition-all whitespace-nowrap">Arbeit</button>
-                <button onclick="setFilter('Privat')" data-filter="Privat" class="filter-btn px-4 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-400 transition-all whitespace-nowrap">Privat</button>
+            <!-- Filter -->
+            <div class="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+                <button onclick="setFilter('all')" data-f="all" class="filter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 text-white whitespace-nowrap transition-all">Alle</button>
+                <button onclick="setFilter('King Quests')" data-f="King Quests" class="filter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-400 whitespace-nowrap transition-all">👑 King Quests</button>
+                <button onclick="setFilter('Arbeit')" data-f="Arbeit" class="filter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-400 whitespace-nowrap transition-all">💼 Arbeit</button>
+                <button onclick="setFilter('Privat')" data-f="Privat" class="filter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-400 whitespace-nowrap transition-all">🏠 Privat</button>
             </div>
 
             <!-- Task List -->
-            <div id="task-list" class="space-y-2.5 pb-20">
-                <!-- Dynamically Populated -->
-            </div>
+            <div id="task-list" class="space-y-2.5 pb-20"></div>
 
             <!-- Empty State -->
             <div id="empty-state" class="hidden flex-col items-center justify-center py-12 text-center">
-                <div class="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center text-slate-500 mb-3">
-                    <i data-lucide="sparkles" class="w-8 h-8"></i>
-                </div>
-                <h3 class="font-bold text-slate-300">Keine Aufgaben gefunden</h3>
-                <p class="text-xs text-slate-500 mt-1">Füge eine neue Quest über das +-Symbol hinzu.</p>
+                <i data-lucide="check-circle" class="w-10 h-10 text-slate-600 mb-2"></i>
+                <p class="text-sm text-slate-400 font-medium">Keine Aufgaben in dieser Liste</p>
             </div>
-
         </main>
 
-        <!-- New Task Modal / Sheet -->
-        <div id="modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center hidden opacity-0 transition-opacity duration-200">
-            <div class="bg-slate-800 w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 border-t border-slate-700 space-y-4">
-                <div class="flex items-center justify-between">
-                    <h2 class="text-lg font-bold text-white">Neue Aufgabe erstellen</h2>
-                    <button onclick="closeModal()" class="text-slate-400 p-1"><i data-lucide="x" class="w-6 h-6"></i></button>
+        <!-- Modal -->
+        <div id="modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end justify-center hidden opacity-0 transition-opacity duration-200">
+            <div class="bg-slate-900 w-full max-w-md rounded-t-3xl p-5 border-t border-slate-800 space-y-4">
+                <div class="flex justify-between items-center">
+                    <h3 class="font-bold text-white text-base">Neue Quest hinzufügen</h3>
+                    <button onclick="toggleModal(false)" class="text-slate-400 p-1"><i data-lucide="x" class="w-5 h-5"></i></button>
                 </div>
-                
-                <div class="space-y-3">
-                    <div>
-                        <label class="text-xs text-slate-400 font-medium mb-1 block">Aufgabe</label>
-                        <input type="text" id="input-title" placeholder="Was steht an?" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500">
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="text-xs text-slate-400 font-medium mb-1 block">Liste / Kategorie</label>
-                            <select id="input-category" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-3 text-sm text-white focus:outline-none">
-                                <option value="King Quests">👑 King Quests</option>
-                                <option value="Arbeit">💼 Arbeit</option>
-                                <option value="Privat">🏠 Privat</option>
-                                <option value="Einkauf">🛒 Einkauf</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="text-xs text-slate-400 font-medium mb-1 block">Priorität</label>
-                            <select id="input-priority" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-3 text-sm text-white focus:outline-none">
-                                <option value="hoch">🔥 Hoch</option>
-                                <option value="mittel" selected>⚡ Mittel</option>
-                                <option value="niedrig">🌱 Niedrig</option>
-                            </select>
-                        </div>
-                    </div>
+                <input type="text" id="task-title" placeholder="Aufgabenbezeichnung..." class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500">
+                <div class="grid grid-cols-2 gap-3">
+                    <select id="task-cat" class="bg-slate-800 border border-slate-700 rounded-xl px-3 py-3 text-sm text-white focus:outline-none">
+                        <option value="King Quests">👑 King Quests</option>
+                        <option value="Arbeit">💼 Arbeit</option>
+                        <option value="Privat">🏠 Privat</option>
+                    </select>
+                    <select id="task-prio" class="bg-slate-800 border border-slate-700 rounded-xl px-3 py-3 text-sm text-white focus:outline-none">
+                        <option value="hoch">🔥 Hoch</option>
+                        <option value="mittel" selected>⚡ Mittel</option>
+                        <option value="niedrig">🌱 Niedrig</option>
+                    </select>
                 </div>
-
-                <button onclick="saveTask()" class="w-full py-3.5 bg-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-600/30 active:scale-95 transition-transform">
-                    Aufgabe speichern
+                <button onclick="addTask()" class="w-full py-3.5 bg-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-600/30 active:scale-95 transition-transform">
+                    Speichern
                 </button>
             </div>
         </div>
@@ -148,165 +90,118 @@
     </div>
 
     <script>
-        // Data State with LocalStorage persistence
-        let tasks = JSON.parse(localStorage.getItem('king_quests_tasks')) || [
-            { id: 1, title: 'Erste King Quest abschließen', category: 'King Quests', priority: 'hoch', done: false },
-            { id: 2, title: 'Wocheneinkauf planen', category: 'Einkauf', priority: 'mittel', done: true }
+        let tasks = JSON.parse(localStorage.getItem('king_quests_v2')) || [
+            { id: 1, title: 'Erste King Quest starten', cat: 'King Quests', prio: 'hoch', done: false }
         ];
-        let currentFilter = 'all';
+        let filter = 'all';
 
-        lucide.createIcons();
-
-        function saveToStorage() {
-            localStorage.setItem('king_quests_tasks', JSON.stringify(tasks));
+        function save() {
+            localStorage.setItem('king_quests_v2', JSON.stringify(tasks));
+            render();
         }
 
         function render() {
-            const listEl = document.getElementById('task-list');
-            const emptyEl = document.getElementById('empty-state');
-            listEl.innerHTML = '';
+            const list = document.getElementById('task-list');
+            const empty = document.getElementById('empty-state');
+            list.innerHTML = '';
 
-            const filteredTasks = tasks.filter(t => currentFilter === 'all' || t.category === currentFilter);
+            const filtered = tasks.filter(t => filter === 'all' || t.cat === filter);
 
-            if (filteredTasks.length === 0) {
-                emptyEl.classList.remove('hidden');
-                emptyEl.classList.add('flex');
+            if (filtered.length === 0) {
+                empty.classList.remove('hidden');
+                empty.classList.add('flex');
             } else {
-                emptyEl.classList.add('hidden');
-                emptyEl.classList.remove('flex');
+                empty.classList.add('hidden');
+                empty.classList.remove('flex');
 
-                filteredTasks.forEach(task => {
+                filtered.forEach(t => {
                     const card = document.createElement('div');
-                    card.className = `task-card p-4 rounded-2xl border flex items-center justify-between gap-3 ${
-                        task.done 
-                        ? 'bg-slate-900/40 border-slate-800/60 opacity-60' 
-                        : 'bg-slate-800 border-slate-700/80 shadow-md'
+                    card.className = `p-3.5 rounded-xl border flex items-center justify-between gap-3 transition-all ${
+                        t.done ? 'bg-slate-900/50 border-slate-800/60 opacity-50 line-through' : 'bg-slate-900 border-slate-800 shadow-sm'
                     }`;
-
-                    const priorityBadge = {
-                        'hoch': '<span class="text-[10px] px-2 py-0.5 rounded-md bg-red-500/20 text-red-400 font-semibold">Hoch</span>',
-                        'mittel': '<span class="text-[10px] px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-400 font-semibold">Mittel</span>',
-                        'niedrig': '<span class="text-[10px] px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 font-semibold">Niedrig</span>'
-                    }[task.priority] || '';
-
                     card.innerHTML = `
-                        <div class="flex items-center gap-3.5 flex-1 min-w-0" onclick="toggleTask(${task.id})">
-                            <div class="w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-colors shrink-0 ${
-                                task.done ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-slate-600'
-                            }">
-                                ${task.done ? '<i data-lucide="check" class="w-4 h-4"></i>' : ''}
+                        <div class="flex items-center gap-3 flex-1 min-w-0" onclick="toggleTask(${t.id})">
+                            <div class="w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 ${t.done ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-slate-600'}">
+                                ${t.done ? '<i data-lucide="check" class="w-3.5 h-3.5"></i>' : ''}
                             </div>
-                            <div class="flex-1 min-w-0">
-                                <div class="text-sm font-medium ${task.done ? 'line-through text-slate-500' : 'text-slate-100'} truncate">${escapeHtml(task.title)}</div>
-                                <div class="flex items-center gap-2 mt-1">
-                                    <span class="text-[11px] text-slate-400 font-medium">${escapeHtml(task.category)}</span>
-                                    ${priorityBadge}
-                                </div>
+                            <div class="min-w-0 flex-1">
+                                <div class="text-sm font-medium text-slate-100 truncate">${escapeHtml(t.title)}</div>
+                                <div class="text-[10px] text-slate-400 mt-0.5">${escapeHtml(t.cat)}</div>
                             </div>
                         </div>
-                        <button onclick="deleteTask(${task.id})" class="p-2 text-slate-500 hover:text-red-400 transition-colors shrink-0">
-                            <i data-lucide="trash-2" class="w-4.5 h-4.5"></i>
-                        </button>
+                        <button onclick="deleteTask(${t.id})" class="text-slate-500 hover:text-red-400 p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                     `;
-                    listEl.appendChild(card);
+                    list.appendChild(card);
                 });
             }
 
-            lucide.createIcons();
-            updateStats();
-        }
-
-        function updateStats() {
+            // Progress stats
             const total = tasks.length;
-            const completed = tasks.filter(t => t.done).length;
-            const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+            const done = tasks.filter(t => t.done).length;
+            const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+            document.getElementById('progress-percent').textContent = `${pct}%`;
+            document.getElementById('progress-bar').style.width = `${pct}%`;
+            document.getElementById('counter-sub').textContent = `${total - done} Aufgaben offen`;
 
-            document.getElementById('progress-percent').textContent = `${percent}%`;
-            document.getElementById('progress-text').textContent = `${completed} von ${total} Aufgaben erledigt`;
-            document.getElementById('progress-bar').style.width = `${percent}%`;
-            document.getElementById('subhead-status').textContent = `${total - completed} Quests verbleibend`;
+            lucide.createIcons();
         }
 
-        function toggleTask(id) {
-            tasks = tasks.map(t => t.id === id ? { ...t, done: !t.done } : t);
-            saveToStorage();
-            render();
-            if (navigator.vibrate) navigator.vibrate(15);
-        }
-
-        function deleteTask(id) {
-            tasks = tasks.filter(t => t.id !== id);
-            saveToStorage();
-            render();
-            if (navigator.vibrate) navigator.vibrate(20);
-        }
-
-        function saveTask() {
-            const titleInput = document.getElementById('input-title');
+        function addTask() {
+            const titleInput = document.getElementById('task-title');
             const title = titleInput.value.trim();
             if (!title) return;
-
-            const category = document.getElementById('input-category').value;
-            const priority = document.getElementById('input-priority').value;
 
             tasks.unshift({
                 id: Date.now(),
                 title,
-                category,
-                priority,
+                cat: document.getElementById('task-cat').value,
+                prio: document.getElementById('task-prio').value,
                 done: false
             });
 
-            saveToStorage();
             titleInput.value = '';
-            closeModal();
-            render();
-            if (navigator.vibrate) navigator.vibrate(30);
+            toggleModal(false);
+            save();
         }
 
-        function setFilter(category) {
-            currentFilter = category;
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                if (btn.dataset.filter === category) {
-                    btn.classList.remove('bg-slate-800', 'text-slate-400');
-                    btn.classList.add('bg-indigo-600', 'text-white');
+        function toggleTask(id) {
+            tasks = tasks.map(t => t.id === id ? { ...t, done: !t.done } : t);
+            save();
+        }
+
+        function deleteTask(id) {
+            tasks = tasks.filter(t => t.id !== id);
+            save();
+        }
+
+        function setFilter(f) {
+            filter = f;
+            document.querySelectorAll('.filter-btn').forEach(b => {
+                if (b.dataset.f === f) {
+                    b.className = 'filter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 text-white whitespace-nowrap transition-all';
                 } else {
-                    btn.classList.remove('bg-indigo-600', 'text-white');
-                    btn.classList.add('bg-slate-800', 'text-slate-400');
+                    b.className = 'filter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-400 whitespace-nowrap transition-all';
                 }
             });
             render();
         }
 
-        function openModal() {
+        function toggleModal(show) {
             const m = document.getElementById('modal');
-            m.classList.remove('hidden');
-            setTimeout(() => m.classList.remove('opacity-0'), 10);
+            if (show) {
+                m.classList.remove('hidden');
+                setTimeout(() => m.classList.remove('opacity-0'), 10);
+            } else {
+                m.classList.add('opacity-0');
+                setTimeout(() => m.classList.add('hidden'), 200);
+            }
         }
 
-        function closeModal() {
-            const m = document.getElementById('modal');
-            m.classList.add('opacity-0');
-            setTimeout(() => m.classList.add('hidden'), 200);
-        }
-
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
+        function escapeHtml(str) {
+            return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
         }
 
         render();
     </script>
 </body>
 </html>
-```eof
-
-### Hauptfunktionen dieser App:
-* **Eigene Standard-Liste:** Die Liste **„King Quests“** ist direkt als Standard-Kategorie hinterlegt.
-* **Filter & Kategorien:** Wechsel mit einem Tippen zwischen King Quests, Arbeit, Privat und Einkäufen.
-* **Prioritäten:** Jede Aufgabe lässt sich farblich nach Dringlichkeit einordnen (Hoch, Mittel, Niedrig).
-* **Lokaler Speicher:** Deine eingegebenen Quests bleiben auf dem Smartphone gespeichert (im Web Storage), auch wenn du die Seite schließt.
-* **Haptisches Feedback:** Vibrationen bei der Bedienung sorgen für ein natives App-Gefühl.
-
-<FollowUp label="Möchtest du Erinnerungszeiten oder ein Fälligkeitsdatum für die Aufgaben ergänzen?" query="Ergänze ein Fälligkeitsdatum und eine Uhrzeit-Auswahl für neue Aufgaben in der To-Do-App."/>
