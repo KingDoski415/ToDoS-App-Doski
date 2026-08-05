@@ -3,168 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>King Quests - Master Kalender</title>
+    <title>King Quests - Pure Kalender</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         body { -webkit-tap-highlight-color: transparent; user-select: none; touch-action: manipulation; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .tab-content { display: none; }
-        .tab-content.active { display: flex; flex-direction: column; animation: fadeIn 0.2s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .modal-slide-up {
+            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+        }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 h-full flex flex-col font-sans overflow-hidden">
 
-    <!-- App Container -->
-    <div class="max-w-md w-full mx-auto h-full flex flex-col bg-slate-900 relative shadow-2xl border-x border-slate-800/80">
+    <!-- Haupt-App Container -->
+    <div class="max-w-md w-full mx-auto h-full flex flex-col bg-slate-900 relative shadow-2xl border-x border-slate-800">
         
         <!-- Header -->
-        <header class="px-5 pt-4 pb-3 bg-slate-900/95 backdrop-blur-md z-20 border-b border-slate-800 flex items-center justify-between shrink-0">
+        <header class="px-5 pt-5 pb-3 bg-slate-900/95 backdrop-blur-md z-20 border-b border-slate-800 flex items-center justify-between shrink-0">
             <div>
                 <div class="flex items-center gap-2">
                     <i data-lucide="crown" class="w-5 h-5 text-amber-400"></i>
                     <h1 class="text-lg font-black tracking-tight text-white">King Quests</h1>
                 </div>
-                <div class="flex items-center gap-2 mt-0.5">
-                    <span id="streak-badge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center gap-1">
-                        <i data-lucide="flame" class="w-3 h-3"></i> <span id="streak-count">0</span> Tage Serie
-                    </span>
-                </div>
+                <span id="streak-badge" class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30 mt-0.5">
+                    <i data-lucide="flame" class="w-3 h-3"></i> <span id="streak-count">0</span> Tage Serie
+                </span>
             </div>
             <div class="flex items-center gap-2">
-                <button onclick="openBriefing()" class="w-9 h-9 rounded-xl bg-slate-800 text-amber-400 border border-amber-400/20 flex items-center justify-center active:scale-95 transition-transform" title="Daily Briefing">
+                <button onclick="openBriefing()" class="w-9 h-9 rounded-xl bg-slate-800 text-amber-400 border border-amber-400/20 flex items-center justify-center active:scale-95 transition-transform">
                     <i data-lucide="sun" class="w-4.5 h-4.5"></i>
                 </button>
-                <button onclick="openModal()" class="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-lg shadow-indigo-600/30 active:scale-95 transition-transform" title="Neuer Eintrag">
+                <button onclick="openCreateModal()" class="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-lg shadow-indigo-600/30 active:scale-95 transition-transform">
                     <i data-lucide="plus" class="w-5 h-5"></i>
                 </button>
             </div>
         </header>
 
-        <!-- Main Content Area -->
-        <main class="flex-1 overflow-hidden relative flex flex-col">
+        <!-- HAUPTANSICHT: NUR DER GROSSE KALENDER -->
+        <main class="flex-1 flex flex-col p-4 overflow-y-auto no-scrollbar justify-center">
             
-            <!-- TAB 1: KALENDER & ÜBERGEORDNETE TAGESANSICHT -->
-            <section id="tab-calendar" class="tab-content active h-full p-4 space-y-3">
-                
-                <!-- 1. Der übergeordnete Master-Kalender (Fest oben) -->
-                <div class="bg-slate-800/90 rounded-2xl p-3.5 border border-slate-700/60 shadow-lg shrink-0">
-                    <div class="flex justify-between items-center mb-3">
-                        <button onclick="changeMonth(-1)" class="p-1.5 text-slate-400 hover:text-white rounded-lg active:bg-slate-700">
-                            <i data-lucide="chevron-left" class="w-5 h-5"></i>
-                        </button>
-                        <h2 id="month-year-label" class="text-sm font-bold text-white"></h2>
-                        <button onclick="changeMonth(1)" class="p-1.5 text-slate-400 hover:text-white rounded-lg active:bg-slate-700">
-                            <i data-lucide="chevron-right" class="w-5 h-5"></i>
-                        </button>
+            <div class="bg-slate-800/90 rounded-3xl p-4 border border-slate-700/80 shadow-2xl">
+                <!-- Monat & Navigation -->
+                <div class="flex justify-between items-center mb-5 px-2">
+                    <button onclick="changeMonth(-1)" class="p-2 text-slate-400 hover:text-white bg-slate-700/50 rounded-xl active:scale-90 transition-transform">
+                        <i data-lucide="chevron-left" class="w-6 h-6"></i>
+                    </button>
+                    <div class="text-center">
+                        <h2 id="month-year-label" class="text-lg font-black text-white"></h2>
+                        <button onclick="selectToday()" class="text-[10px] text-indigo-400 font-bold uppercase tracking-wider mt-0.5">Heute anzeigen</button>
                     </div>
-
-                    <!-- Wochentage -->
-                    <div class="grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-slate-400 mb-1.5">
-                        <div>Mo</div><div>Di</div><div>Mi</div><div>Do</div><div>Fr</div><div>Sa</div><div>So</div>
-                    </div>
-
-                    <!-- Tage Grid -->
-                    <div id="calendar-grid" class="grid grid-cols-7 gap-1 text-center text-xs"></div>
+                    <button onclick="changeMonth(1)" class="p-2 text-slate-400 hover:text-white bg-slate-700/50 rounded-xl active:scale-90 transition-transform">
+                        <i data-lucide="chevron-right" class="w-6 h-6"></i>
+                    </button>
                 </div>
 
-                <!-- Suchfeld & Filter -->
-                <div class="space-y-2 shrink-0">
-                    <div class="relative">
-                        <i data-lucide="search" class="w-4 h-4 absolute left-3 top-2.5 text-slate-500"></i>
-                        <input type="text" id="search-input" oninput="renderItems()" placeholder="Einträge durchsuchen..." class="w-full bg-slate-800/80 border border-slate-700/80 rounded-xl pl-9 pr-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
-                    </div>
-                    
-                    <div class="flex gap-1.5 overflow-x-auto no-scrollbar py-0.5" id="type-filter-bar">
-                        <button onclick="setFilter('all')" data-f="all" class="f-btn px-3 py-1 rounded-lg text-[11px] font-bold bg-indigo-600 text-white whitespace-nowrap">Alle</button>
-                        <button onclick="setFilter('todo')" data-f="todo" class="f-btn px-3 py-1 rounded-lg text-[11px] font-bold bg-slate-800 text-slate-400 whitespace-nowrap">To-Dos</button>
-                        <button onclick="setFilter('event')" data-f="event" class="f-btn px-3 py-1 rounded-lg text-[11px] font-bold bg-slate-800 text-slate-400 whitespace-nowrap">Termine</button>
-                        <button onclick="setFilter('done')" data-f="done" class="f-btn px-3 py-1 rounded-lg text-[11px] font-bold bg-slate-800 text-slate-400 whitespace-nowrap">Erledigt</button>
-                    </div>
+                <!-- Wochentage -->
+                <div class="grid grid-cols-7 gap-1 text-center text-xs font-bold text-slate-400 mb-3">
+                    <div>Mo</div><div>Di</div><div>Mi</div><div>Do</div><div>Fr</div><div>Sa</div><div>So</div>
                 </div>
 
-                <!-- 2. Die scrollbare Tages-Detailansicht (Öffnet sich beim Klick auf den Tag) -->
-                <div class="flex-1 flex flex-col min-h-0 bg-slate-900/50 rounded-2xl border border-slate-800 p-3">
-                    <div class="flex justify-between items-center mb-2 shrink-0">
-                        <div class="flex items-center gap-2">
-                            <i data-lucide="calendar-days" class="w-4 h-4 text-indigo-400"></i>
-                            <h3 id="day-title" class="font-black text-xs text-indigo-200 uppercase tracking-wider">Tagesübersicht</h3>
-                        </div>
-                        <button onclick="selectToday()" class="text-[10px] font-semibold px-2 py-0.5 rounded-lg bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 active:scale-95 transition-transform">
-                            Heute wählen
-                        </button>
-                    </div>
+                <!-- Kalender-Tage Grid (Große Touch-Flächen) -->
+                <div id="calendar-grid" class="grid grid-cols-7 gap-1.5 text-center text-sm"></div>
+            </div>
 
-                    <!-- Scrollbarer Container für To-Dos, damit nichts abgeschnitten wird -->
-                    <div id="item-scroll-container" class="flex-1 overflow-y-auto no-scrollbar space-y-2 pr-1 pb-16">
-                        <div id="item-list" class="space-y-2"></div>
-                        
-                        <!-- Empty State -->
-                        <div id="empty-state" class="hidden flex-col items-center justify-center py-10 text-center">
-                            <i data-lucide="sparkles" class="w-8 h-8 text-slate-600 mb-2"></i>
-                            <p class="text-xs text-slate-400 font-medium">Keine Einträge für diesen Tag</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- TAB 2: KATEGORIEN -->
-            <section id="tab-categories" class="tab-content h-full p-4 space-y-4 overflow-y-auto no-scrollbar pb-20">
-                <div class="flex justify-between items-center">
-                    <h2 class="font-bold text-white text-sm">Kategorien verwalten</h2>
-                    <button onclick="addCategory()" class="text-xs text-indigo-400 font-semibold px-2.5 py-1 rounded-lg bg-indigo-600/20 border border-indigo-500/30">+ Neu</button>
-                </div>
-                <div id="category-management-list" class="space-y-2"></div>
-            </section>
-
-            <!-- TAB 3: OPTIONEN -->
-            <section id="tab-settings" class="tab-content h-full p-4 space-y-4 overflow-y-auto no-scrollbar pb-20">
-                <div class="bg-slate-800/60 rounded-2xl p-4 border border-slate-700/60 space-y-3">
-                    <h3 class="font-bold text-white text-sm">Daten sichern & wiederherstellen</h3>
-                    <p class="text-xs text-slate-400">Sichere deine Quests, Termine und Kategorien als Backup.</p>
-                    
-                    <div class="grid grid-cols-2 gap-3">
-                        <button onclick="exportData()" class="py-2.5 px-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 active:scale-95 transition-transform">
-                            <i data-lucide="download" class="w-4 h-4"></i> Exportieren
-                        </button>
-                        <button onclick="document.getElementById('import-file').click()" class="py-2.5 px-3 bg-slate-700 hover:bg-slate-600 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 active:scale-95 transition-transform">
-                            <i data-lucide="upload" class="w-4 h-4"></i> Importieren
-                        </button>
-                        <input type="file" id="import-file" onchange="importData(event)" class="hidden" accept=".json">
-                    </div>
-                </div>
-
-                <div class="bg-slate-800/60 rounded-2xl p-4 border border-slate-700/60 space-y-2">
-                    <h3 class="font-bold text-white text-sm">Gamification & Streak</h3>
-                    <div class="flex justify-between items-center text-xs text-slate-300">
-                        <span>Aktuelle Erfolgsserie</span>
-                        <span class="font-bold text-amber-400" id="settings-streak-val">0 Tage</span>
-                    </div>
-                </div>
-            </section>
+            <!-- Hinweis am unteren Rand -->
+            <p class="text-center text-xs text-slate-500 mt-6 font-medium">
+                Tippe auf einen Tag, um den Zeitstrahl & die Aufgaben zu öffnen
+            </p>
 
         </main>
 
-        <!-- Bottom Navigation Bar -->
-        <nav class="absolute bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-lg border-t border-slate-800 px-6 py-2.5 flex justify-around items-center z-30 shrink-0">
-            <button onclick="switchTab('calendar')" id="nav-calendar" class="nav-btn flex flex-col items-center gap-1 text-indigo-400 font-bold text-[10px]">
-                <i data-lucide="calendar" class="w-5 h-5"></i>
-                <span>Kalender</span>
-            </button>
-            <button onclick="switchTab('categories')" id="nav-categories" class="nav-btn flex flex-col items-center gap-1 text-slate-500 font-bold text-[10px]">
-                <i data-lucide="tag" class="w-5 h-5"></i>
-                <span>Kategorien</span>
-            </button>
-            <button onclick="switchTab('settings')" id="nav-settings" class="nav-btn flex flex-col items-center gap-1 text-slate-500 font-bold text-[10px]">
-                <i data-lucide="settings" class="w-5 h-5"></i>
-                <span>Optionen</span>
-            </button>
-        </nav>
+        <!-- TAGES-OVERLAY (Öffnet sich beim Tippen auf einen Tag) -->
+        <div id="day-sheet" class="fixed inset-0 bg-black/80 backdrop-blur-md z-40 flex items-end justify-center hidden opacity-0 transition-opacity duration-200">
+            <div class="bg-slate-900 w-full max-w-md h-[88vh] rounded-t-3xl border-t border-slate-700/80 flex flex-col shadow-2xl transform translate-y-full modal-slide-up overflow-hidden">
+                
+                <!-- Sheet Header -->
+                <div class="p-4 bg-slate-800/90 border-b border-slate-700/80 flex justify-between items-center shrink-0">
+                    <div>
+                        <span class="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">Tagesübersicht</span>
+                        <h3 id="day-sheet-title" class="font-black text-base text-white">00.00.0000</h3>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="openCreateModal(selectedDateStr)" class="px-3 py-1.5 bg-indigo-600 text-white rounded-xl text-xs font-bold flex items-center gap-1 active:scale-95 transition-transform">
+                            <i data-lucide="plus" class="w-3.5 h-3.5"></i> Quest
+                        </button>
+                        <button onclick="closeDaySheet()" class="p-2 text-slate-400 hover:text-white rounded-xl bg-slate-800 border border-slate-700">
+                            <i data-lucide="x" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Sheet Inhalt (Scrollbar) -->
+                <div class="flex-1 overflow-y-auto no-scrollbar p-4 space-y-5">
+                    
+                    <!-- BEREICH 1: UNTERMINIERTE TODOS -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                                <i data-lucide="check-square" class="w-3.5 h-3.5 text-amber-400"></i> Noch nicht terminiert
+                            </span>
+                            <span id="untimed-count" class="text-[10px] bg-slate-800 text-slate-400 font-bold px-2 py-0.5 rounded-full">0</span>
+                        </div>
+                        <div id="untimed-list" class="space-y-2"></div>
+                    </div>
+
+                    <hr class="border-slate-800">
+
+                    <!-- BEREICH 2: VORHANDENER ZEITSTRAHL (TIMELINE) -->
+                    <div class="space-y-2">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                            <i data-lucide="clock" class="w-3.5 h-3.5 text-indigo-400"></i> Zeitstrahl
+                        </span>
+                        
+                        <div id="timeline-container" class="relative pl-12 space-y-4 pt-2">
+                            <!-- Zeitstrahl wird hier dynamisch generiert -->
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
 
         <!-- MODAL: ERSTELLEN / BEARBEITEN -->
-        <div id="modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end justify-center hidden opacity-0 transition-opacity duration-200">
+        <div id="modal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-end justify-center hidden opacity-0 transition-opacity duration-200">
             <div class="bg-slate-900 w-full max-w-md rounded-t-3xl p-5 border-t border-slate-800 space-y-3.5 max-h-[90vh] overflow-y-auto no-scrollbar">
                 <div class="flex justify-between items-center">
                     <h3 id="modal-title-text" class="font-bold text-white text-base">Eintrag erstellen</h3>
@@ -173,13 +138,12 @@
                 
                 <input type="hidden" id="edit-item-id">
 
-                <!-- Typ-Auswahl -->
                 <div class="grid grid-cols-2 gap-2 p-1 bg-slate-800 rounded-xl border border-slate-700">
                     <button type="button" onclick="setType('todo')" id="type-btn-todo" class="py-1.5 text-xs font-bold rounded-lg bg-indigo-600 text-white transition-all">To-Do</button>
                     <button type="button" onclick="setType('event')" id="type-btn-event" class="py-1.5 text-xs font-bold rounded-lg text-slate-400 transition-all">Termin</button>
                 </div>
 
-                <input type="text" id="item-title" placeholder="Titel / Bezeichnung..." class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500">
+                <input type="text" id="item-title" placeholder="Titel / Quest..." class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500">
                 
                 <div class="grid grid-cols-2 gap-2.5">
                     <div>
@@ -199,11 +163,11 @@
 
                 <div class="grid grid-cols-2 gap-2.5">
                     <div>
-                        <label class="text-[10px] text-slate-400 block mb-0.5">Startzeit</label>
+                        <label class="text-[10px] text-slate-400 block mb-0.5">Startzeit (Optional)</label>
                         <input type="time" id="item-start-time" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-2 text-xs text-white focus:outline-none">
                     </div>
                     <div>
-                        <label class="text-[10px] text-slate-400 block mb-0.5">Endzeit</label>
+                        <label class="text-[10px] text-slate-400 block mb-0.5">Endzeit (Optional)</label>
                         <input type="time" id="item-end-time" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-2 text-xs text-white focus:outline-none">
                     </div>
                 </div>
@@ -229,7 +193,7 @@
             </div>
         </div>
 
-        <!-- MODAL: DAILY BRIEFING -->
+        <!-- BRIEFING MODAL -->
         <div id="briefing-modal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-200">
             <div class="bg-slate-900 w-full max-w-sm rounded-3xl p-5 border border-slate-800 space-y-4">
                 <div class="flex justify-between items-center border-b border-slate-800 pb-3">
@@ -239,9 +203,7 @@
                     </div>
                     <button onclick="closeBriefing()" class="text-slate-400 p-1"><i data-lucide="x" class="w-5 h-5"></i></button>
                 </div>
-
                 <div class="space-y-3" id="briefing-content"></div>
-
                 <button onclick="closeBriefing()" class="w-full py-2.5 bg-amber-500 text-slate-950 font-black text-xs rounded-xl shadow-lg shadow-amber-500/20 active:scale-95 transition-transform">
                     Morgen-Quest starten!
                 </button>
@@ -255,45 +217,30 @@
         let currentDate = new Date();
         let selectedDateStr = todayStr;
         let selectedType = 'todo';
-        let currentFilter = 'all';
 
         let categories = JSON.parse(localStorage.getItem('king_quests_categories')) || [
-            { id: 'kq', name: 'King Quests', color: '#f59e0b', icon: 'crown' },
-            { id: 'work', name: 'Arbeit', color: '#3b82f6', icon: 'briefcase' },
-            { id: 'priv', name: 'Privat', color: '#10b981', icon: 'home' }
+            { id: 'kq', name: 'King Quests', color: '#f59e0b' },
+            { id: 'work', name: 'Arbeit', color: '#3b82f6' },
+            { id: 'priv', name: 'Privat', color: '#10b981' }
         ];
 
-        let items = JSON.parse(localStorage.getItem('king_quests_items_v5')) || [
-            { id: 1, type: 'todo', title: 'Master-Kalender ausprobieren', date: todayStr, startTime: '10:00', endTime: '11:00', cat: 'King Quests', prio: 'hoch', repeat: 'none', done: false }
+        let items = JSON.parse(localStorage.getItem('king_quests_items_v6')) || [
+            { id: 1, type: 'todo', title: 'Unterminiertes To-Do testen', date: todayStr, startTime: '', endTime: '', cat: 'King Quests', prio: 'mittel', repeat: 'none', done: false },
+            { id: 2, type: 'event', title: 'Wichtiges Meeting', date: todayStr, startTime: '10:00', endTime: '11:30', cat: 'Arbeit', prio: 'hoch', repeat: 'none', done: false },
+            { id: 3, type: 'todo', title: 'Workout & Training', date: todayStr, startTime: '17:00', endTime: '18:15', cat: 'Privat', prio: 'hoch', repeat: 'none', done: false }
         ];
 
         let streakData = JSON.parse(localStorage.getItem('king_quests_streak')) || { count: 0, lastDoneDate: '' };
 
         function saveData() {
-            localStorage.setItem('king_quests_items_v5', JSON.stringify(items));
+            localStorage.setItem('king_quests_items_v6', JSON.stringify(items));
             localStorage.setItem('king_quests_categories', JSON.stringify(categories));
             localStorage.setItem('king_quests_streak', JSON.stringify(streakData));
             renderCalendar();
-            renderItems();
-            renderCategories();
+            if (!document.getElementById('day-sheet').classList.contains('hidden')) {
+                renderDayDetails();
+            }
             updateStreakUI();
-        }
-
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.getElementById(`tab-${tabId}`).classList.add('active');
-            
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('text-indigo-400');
-                btn.classList.add('text-slate-500');
-            });
-            document.getElementById(`nav-${tabId}`).classList.remove('text-slate-500');
-            document.getElementById(`nav-${tabId}`).classList.add('text-indigo-400');
-        }
-
-        function renderCategoriesSelect() {
-            const sel = document.getElementById('item-cat');
-            sel.innerHTML = categories.map(c => `<option value="${escapeHtml(c.name)}">${escapeHtml(c.name)}</option>`).join('');
         }
 
         function renderCalendar() {
@@ -316,21 +263,142 @@
                 const dayFormatted = String(d).padStart(2, '0');
                 const dateKey = `${year}-${monthFormatted}-${dayFormatted}`;
 
-                const hasPending = items.some(i => (i.date === dateKey || isRepeatingOn(i, dateKey)) && !i.done);
-                const isSelected = dateKey === selectedDateStr;
+                const dayItems = items.filter(i => (i.date === dateKey || isRepeatingOn(i, dateKey)));
+                const hasPending = dayItems.some(i => !i.done);
                 const isToday = dateKey === todayStr;
 
                 const dayBtn = document.createElement('button');
-                dayBtn.onclick = () => { selectedDateStr = dateKey; renderCalendar(); renderItems(); };
+                dayBtn.onclick = () => openDaySheet(dateKey);
 
-                let bgClass = "bg-slate-900/50 text-slate-300 hover:bg-slate-800";
-                if (isSelected) bgClass = "bg-indigo-600 text-white font-bold ring-2 ring-indigo-400";
-                else if (isToday) bgClass = "bg-indigo-950/80 text-indigo-300 border border-indigo-500/50 font-bold";
+                let bgClass = "bg-slate-800/60 text-slate-300 hover:bg-slate-700/80";
+                if (isToday) bgClass = "bg-indigo-600 text-white font-bold ring-2 ring-indigo-400 shadow-lg shadow-indigo-600/30";
 
-                dayBtn.className = `h-8 rounded-xl flex flex-col items-center justify-center relative transition-all ${bgClass}`;
-                dayBtn.innerHTML = `<span>${d}</span>${hasPending ? '<span class="w-1.5 h-1.5 rounded-full bg-amber-400 absolute bottom-0.5"></span>' : ''}`;
+                dayBtn.className = `h-12 rounded-2xl flex flex-col items-center justify-center relative transition-all active:scale-95 ${bgClass}`;
+                dayBtn.innerHTML = `
+                    <span class="text-sm font-semibold">${d}</span>
+                    ${hasPending ? '<span class="w-1.5 h-1.5 rounded-full bg-amber-400 absolute bottom-1.5"></span>' : ''}
+                `;
                 grid.appendChild(dayBtn);
             }
+            lucide.createIcons();
+        }
+
+        function openDaySheet(dateKey) {
+            selectedDateStr = dateKey;
+            const dateParts = dateKey.split('-');
+            document.getElementById('day-sheet-title').textContent = `${dateParts[2]}.${dateParts[1]}.${dateParts[0]}`;
+            
+            renderDayDetails();
+
+            const sheet = document.getElementById('day-sheet');
+            sheet.classList.remove('hidden');
+            setTimeout(() => {
+                sheet.classList.remove('opacity-0');
+                sheet.querySelector('.modal-slide-up').classList.remove('translate-y-full');
+            }, 10);
+        }
+
+        function closeDaySheet() {
+            const sheet = document.getElementById('day-sheet');
+            sheet.querySelector('.modal-slide-up').classList.add('translate-y-full');
+            sheet.classList.add('opacity-0');
+            setTimeout(() => sheet.classList.add('hidden'), 250);
+        }
+
+        function renderDayDetails() {
+            const untimedList = document.getElementById('untimed-list');
+            const timelineContainer = document.getElementById('timeline-container');
+            
+            untimedList.innerHTML = '';
+            timelineContainer.innerHTML = '';
+
+            const dayItems = items.filter(i => i.date === selectedDateStr || isRepeatingOn(i, selectedDateStr));
+
+            // 1. Unterminierte To-Dos
+            const untimed = dayItems.filter(i => !i.startTime);
+            document.getElementById('untimed-count').textContent = untimed.length;
+
+            if (untimed.length === 0) {
+                untimedList.innerHTML = `<p class="text-xs text-slate-500 italic py-1">Keine unterminierten Aufgaben.</p>`;
+            } else {
+                untimed.forEach(item => {
+                    untimedList.appendChild(createItemCard(item));
+                });
+            }
+
+            // 2. Zeitstrahl (Timeline für terminierte Einträge)
+            const timed = dayItems.filter(i => i.startTime);
+            timed.sort((a, b) => a.startTime.localeCompare(b.startTime));
+
+            // Vertikale Zeitstrahl-Linie
+            const line = document.createElement('div');
+            line.className = "absolute left-4 top-0 bottom-0 w-0.5 bg-slate-800";
+            timelineContainer.appendChild(line);
+
+            if (timed.length === 0) {
+                const empty = document.createElement('div');
+                empty.className = "text-xs text-slate-500 italic py-2 pl-2";
+                empty.textContent = "Keine fest terminierten Quests für diesen Tag.";
+                timelineContainer.appendChild(empty);
+            } else {
+                timed.forEach(item => {
+                    const row = document.createElement('div');
+                    row.className = "relative flex items-start gap-3";
+
+                    // Zeit-Marker links
+                    let timeText = item.startTime;
+                    if (item.endTime) timeText += `<br><span class="text-slate-500 text-[9px]">${item.endTime}</span>`;
+
+                    row.innerHTML = `
+                        <div class="absolute -left-12 top-1 text-right w-8 text-[11px] font-bold text-indigo-400 leading-tight">
+                            ${timeText}
+                        </div>
+                        <div class="w-2.5 h-2.5 rounded-full bg-indigo-500 border-2 border-slate-900 absolute -left-[17px] top-2.5 z-10"></div>
+                        <div class="flex-1 min-w-0">
+                            ${createItemCardHTML(item)}
+                        </div>
+                    `;
+                    timelineContainer.appendChild(row);
+                });
+            }
+
+            lucide.createIcons();
+        }
+
+        function createItemCard(item) {
+            const card = document.createElement('div');
+            card.innerHTML = createItemCardHTML(item);
+            return card.firstElementChild;
+        }
+
+        function createItemCardHTML(item) {
+            const catObj = categories.find(c => c.name === item.cat);
+            const catColor = catObj ? catObj.color : '#6366f1';
+
+            return `
+                <div class="p-3 rounded-2xl border flex items-center justify-between gap-2.5 transition-all ${
+                    item.done ? 'bg-slate-900/40 border-slate-800/60 opacity-50 line-through' : 'bg-slate-800/90 border-slate-700/80 shadow-md'
+                }">
+                    <div class="flex items-center gap-2.5 flex-1 min-w-0" onclick="toggleItemDone(${item.id})">
+                        <div class="w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 ${item.done ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-slate-600'}">
+                            ${item.done ? '<i data-lucide="check" class="w-3.5 h-3.5"></i>' : (item.type === 'event' ? '<i data-lucide="calendar" class="w-3 h-3 text-slate-400"></i>' : '')}
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-xs font-semibold text-slate-100 truncate">${escapeHtml(item.title)}</span>
+                                ${item.repeat !== 'none' ? '<i data-lucide="repeat" class="w-3 h-3 text-amber-400"></i>' : ''}
+                            </div>
+                            <div class="flex items-center gap-1.5 text-[10px] text-slate-400 mt-0.5">
+                                <span class="px-1.5 py-0.2 rounded font-bold" style="background-color: ${catColor}20; color: ${catColor}">${escapeHtml(item.cat)}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <button onclick="openCreateModal(${item.id})" class="p-1 text-slate-400 hover:text-white"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
+                        <button onclick="deleteItem(${item.id})" class="p-1 text-slate-400 hover:text-red-400"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                    </div>
+                </div>
+            `;
         }
 
         function isRepeatingOn(item, dateStr) {
@@ -338,78 +406,10 @@
             if (dateStr < item.date) return false;
             const d1 = new Date(item.date);
             const d2 = new Date(dateStr);
-
             if (item.repeat === 'daily') return true;
             if (item.repeat === 'weekly') return d1.getDay() === d2.getDay();
             if (item.repeat === 'monthly') return d1.getDate() === d2.getDate();
             return false;
-        }
-
-        function renderItems() {
-            const list = document.getElementById('item-list');
-            const empty = document.getElementById('empty-state');
-            const query = document.getElementById('search-input').value.toLowerCase();
-            list.innerHTML = '';
-
-            const dateParts = selectedDateStr.split('-');
-            document.getElementById('day-title').textContent = `Tagesübersicht: ${dateParts[2]}.${dateParts[1]}.${dateParts[0]}`;
-
-            let filtered = items.filter(i => (i.date === selectedDateStr || isRepeatingOn(i, selectedDateStr)));
-
-            if (currentFilter === 'todo') filtered = filtered.filter(i => i.type === 'todo');
-            else if (currentFilter === 'event') filtered = filtered.filter(i => i.type === 'event');
-            else if (currentFilter === 'done') filtered = filtered.filter(i => i.done);
-
-            if (query) filtered = filtered.filter(i => i.title.toLowerCase().includes(query));
-
-            filtered.sort((a, b) => (a.startTime || '99:99').localeCompare(b.startTime || '99:99'));
-
-            if (filtered.length === 0) {
-                empty.classList.remove('hidden'); empty.classList.add('flex');
-            } else {
-                empty.classList.add('hidden'); empty.classList.remove('flex');
-
-                filtered.forEach(item => {
-                    const card = document.createElement('div');
-                    card.className = `p-3 rounded-xl border flex items-center justify-between gap-2.5 transition-all ${
-                        item.done ? 'bg-slate-900/40 border-slate-800/60 opacity-50 line-through' : 'bg-slate-800 border-slate-700/80 shadow-md'
-                    }`;
-
-                    let timeText = '';
-                    if (item.startTime && item.endTime) timeText = `${item.startTime} - ${item.endTime}`;
-                    else if (item.startTime) timeText = `ab ${item.startTime}`;
-
-                    const catObj = categories.find(c => c.name === item.cat);
-                    const catColor = catObj ? catObj.color : '#6366f1';
-
-                    card.innerHTML = `
-                        <div class="flex items-center gap-2.5 flex-1 min-w-0" onclick="toggleItemDone(${item.id})">
-                            <div class="w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 ${item.done ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-slate-600'}">
-                                ${item.done ? '<i data-lucide="check" class="w-3.5 h-3.5"></i>' : (item.type === 'event' ? '<i data-lucide="calendar" class="w-3 h-3 text-slate-400"></i>' : '')}
-                            </div>
-                            <div class="min-w-0 flex-1">
-                                <div class="flex items-center gap-1.5">
-                                    <span class="text-xs font-semibold text-slate-100 truncate">${escapeHtml(item.title)}</span>
-                                    ${item.repeat !== 'none' ? '<i data-lucide="repeat" class="w-3 h-3 text-amber-400"></i>' : ''}
-                                </div>
-                                <div class="flex items-center gap-1.5 text-[10px] text-slate-400 mt-0.5">
-                                    <span class="px-1.5 py-0.2 rounded font-bold text-white" style="background-color: ${catColor}20; color: ${catColor}">${escapeHtml(item.cat)}</span>
-                                    ${timeText ? `• <span class="text-amber-400 font-semibold"><i data-lucide="clock" class="w-2.5 h-2.5 inline"></i> ${timeText}</span>` : ''}
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Quick Actions -->
-                        <div class="flex items-center gap-1">
-                            <button onclick="shiftDate(${item.id})" class="p-1 text-slate-400 hover:text-indigo-400" title="Auf morgen verschieben"><i data-lucide="arrow-right-left" class="w-3.5 h-3.5"></i></button>
-                            <button onclick="openModal(${item.id})" class="p-1 text-slate-400 hover:text-white" title="Bearbeiten"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
-                            <button onclick="deleteItem(${item.id})" class="p-1 text-slate-400 hover:text-red-400" title="Löschen"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
-                        </div>
-                    `;
-                    list.appendChild(card);
-                });
-            }
-            lucide.createIcons();
         }
 
         function toggleItemDone(id) {
@@ -434,20 +434,6 @@
 
         function updateStreakUI() {
             document.getElementById('streak-count').textContent = streakData.count;
-            document.getElementById('settings-streak-val').textContent = `${streakData.count} Tage`;
-        }
-
-        function shiftDate(id) {
-            items = items.map(i => {
-                if (i.id === id) {
-                    const d = new Date(i.date || selectedDateStr);
-                    d.setDate(d.getDate() + 1);
-                    return { ...i, date: d.toISOString().split('T')[0] };
-                }
-                return i;
-            });
-            saveData();
-            if (navigator.vibrate) navigator.vibrate(20);
         }
 
         function deleteItem(id) {
@@ -455,12 +441,12 @@
             saveData();
         }
 
-        function openModal(editId = null) {
+        function openCreateModal(arg = null) {
             renderCategoriesSelect();
             const m = document.getElementById('modal');
             
-            if (editId) {
-                const item = items.find(i => i.id === editId);
+            if (typeof arg === 'number') {
+                const item = items.find(i => i.id === arg);
                 if (!item) return;
                 document.getElementById('modal-title-text').textContent = 'Eintrag bearbeiten';
                 document.getElementById('edit-item-id').value = item.id;
@@ -476,7 +462,7 @@
                 document.getElementById('modal-title-text').textContent = 'Neuer Eintrag';
                 document.getElementById('edit-item-id').value = '';
                 document.getElementById('item-title').value = '';
-                document.getElementById('item-date').value = selectedDateStr;
+                document.getElementById('item-date').value = (typeof arg === 'string') ? arg : selectedDateStr;
                 document.getElementById('item-start-time').value = '';
                 document.getElementById('item-end-time').value = '';
                 document.getElementById('item-repeat').value = 'none';
@@ -491,6 +477,11 @@
             const m = document.getElementById('modal');
             m.classList.add('opacity-0');
             setTimeout(() => m.classList.add('hidden'), 200);
+        }
+
+        function renderCategoriesSelect() {
+            const sel = document.getElementById('item-cat');
+            sel.innerHTML = categories.map(c => `<option value="${escapeHtml(c.name)}">${escapeHtml(c.name)}</option>`).join('');
         }
 
         function setType(type) {
@@ -533,64 +524,6 @@
             saveData();
         }
 
-        // KATEGORIEN-VERWALTUNG
-        function renderCategories() {
-            const list = document.getElementById('category-management-list');
-            list.innerHTML = categories.map(c => `
-                <div class="p-3 bg-slate-800/80 rounded-xl border border-slate-700/80 flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <span class="w-3 h-3 rounded-full" style="background-color: ${c.color}"></span>
-                        <span class="text-xs font-bold text-white">${escapeHtml(c.name)}</span>
-                    </div>
-                    <button onclick="deleteCategory('${c.id}')" class="text-slate-500 hover:text-red-400 text-xs"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                </div>
-            `).join('');
-            lucide.createIcons();
-        }
-
-        function addCategory() {
-            const name = prompt("Name der neuen Kategorie:");
-            if (!name) return;
-            const colors = ['#ec4899', '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b'];
-            const color = colors[Math.floor(Math.random() * colors.length)];
-            categories.push({ id: 'cat_' + Date.now(), name, color, icon: 'tag' });
-            saveData();
-        }
-
-        function deleteCategory(id) {
-            categories = categories.filter(c => c.id !== id);
-            saveData();
-        }
-
-        // EXPORT / IMPORT
-        function exportData() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ items, categories, streakData }));
-            const dl = document.createElement('a');
-            dl.setAttribute("href", dataStr);
-            dl.setAttribute("download", `king_quests_backup_${todayStr}.json`);
-            dl.click();
-        }
-
-        function importData(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(evt) {
-                try {
-                    const parsed = JSON.parse(evt.target.result);
-                    if (parsed.items) items = parsed.items;
-                    if (parsed.categories) categories = parsed.categories;
-                    if (parsed.streakData) streakData = parsed.streakData;
-                    saveData();
-                    alert("Backup erfolgreich geladen!");
-                } catch (err) {
-                    alert("Fehler beim Importieren der Datei.");
-                }
-            };
-            reader.readAsText(file);
-        }
-
-        // DAILY BRIEFING
         function openBriefing() {
             const todaysItems = items.filter(i => i.date === todayStr || isRepeatingOn(i, todayStr));
             const pending = todaysItems.filter(i => !i.done);
@@ -619,20 +552,10 @@
             setTimeout(() => modal.classList.add('hidden'), 200);
         }
 
-        function setFilter(f) {
-            currentFilter = f;
-            document.querySelectorAll('.f-btn').forEach(b => {
-                if (b.dataset.f === f) b.className = 'f-btn px-3 py-1 rounded-lg text-[11px] font-bold bg-indigo-600 text-white whitespace-nowrap';
-                else b.className = 'f-btn px-3 py-1 rounded-lg text-[11px] font-bold bg-slate-800 text-slate-400 whitespace-nowrap';
-            });
-            renderItems();
-        }
-
         function changeMonth(delta) { currentDate.setMonth(currentDate.getMonth() + delta); renderCalendar(); }
-        function selectToday() { currentDate = new Date(); selectedDateStr = todayStr; renderCalendar(); renderItems(); }
+        function selectToday() { currentDate = new Date(); openDaySheet(todayStr); renderCalendar(); }
         function escapeHtml(str) { return str ? str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)) : ''; }
 
-        // Init
         saveData();
     </script>
 </body>
